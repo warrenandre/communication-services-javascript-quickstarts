@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "sourceMap": false   
+    },
+    "files": [
+        "Logger.ts",
+        "BlobStorageHelper.ts", 
+        "api/controllers/CallRecordingController.ts",
+        "api/routes/callRecordingRoutes.ts", 
+        "server.ts", 
+        "config.ts"
+      ]
+}
