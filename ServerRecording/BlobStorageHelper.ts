@@ -73,7 +73,7 @@ export class BlobStorageHelper {
     }
   }
 
-  public static getExecptionDetails(e) {
+  public static getExecptionDetails(e: any) {
     let statusCode = e.statusCode || e.status || "500"
     let name = e.message || e.name || 'Some error occoured'
     let stack = e.stack || ' Not available'

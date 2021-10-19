@@ -1,5 +1,5 @@
 'use strict';
-module.exports = function (app) {
+module.exports = function (app: any) {
   var controller = require('../controllers/callRecordingController');
 
   app.route('/')

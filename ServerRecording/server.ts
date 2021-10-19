@@ -1,3 +1,5 @@
+import { Request, Response } from "express";
+
 var express = require('express'),
   app = express(),
   port = process.env.PORT || 3000;
@@ -11,7 +13,7 @@ routes(app);
 
 app.listen(port);
 
-app.use(function (req, res) {
+app.use(function (req: Request, res: Response) {
   res.status(404).send({ url: req.originalUrl + ' not found' })
 });
 
