@@ -5,20 +5,18 @@ import { EventDispatcher } from "./EventHandler/EventDispatcher";
 import {
   CallingServerClient,
   CallConnection,
-  MediaType,
-  EventSubscriptionType,
+  CallMediaType,
+  CallingEventSubscriptionType,
   ToneReceivedEvent,
   ToneInfo,
   PlayAudioResult,
-  KnownOperationStatus,
   KnownCallingServerEventType,
   PlayAudioResultEvent,
   AddParticipantResultEvent,
   KnownToneValue,
-  CallConnectionsCancelAllMediaOperationsResponse,
   CallConnectionStateChangedEvent,
   KnownCallConnectionState,
-  CreateCallOptions,
+  CreateCallConnectionOptions,
   PlayAudioOptions,
   AddParticipantOptions,
   CallConnectionsAddParticipantResponse,
@@ -82,13 +80,13 @@ export class OutboundCallReminder {
       var alternateCallerId: PhoneNumberIdentifier = {
         phoneNumber: this.callConfiguration.sourcePhoneNumber,
       };
-      var callModality: MediaType[] = [MediaType.Audio];
-      var eventSubscriptionType: EventSubscriptionType[] = [
-        EventSubscriptionType.ParticipantsUpdated,
-        EventSubscriptionType.ToneReceived,
+      var callModality: CallMediaType[] = ["audio"];
+      var eventSubscriptionType: CallingEventSubscriptionType[] = [
+        "participantsUpdated",
+        "toneReceived",
       ];
 
-      var createCallOption: CreateCallOptions = {
+      var createCallOption: CreateCallConnectionOptions = {
         alternateCallerId: alternateCallerId,
         callbackUri: this.callConfiguration.appCallbackUrl,
         requestedMediaTypes: callModality,
@@ -227,26 +225,8 @@ export class OutboundCallReminder {
           MessageType.INFORMATION,
           "Performing cancel media processing operation to stop playing audio"
         );
-        var operationContext: string = uuidv4();
         var cancelMediaOptions: CancelAllMediaOperationsOptions = {};
-        var cancelMediaResponse: CallConnectionsCancelAllMediaOperationsResponse =
-          await this.callConnection.cancelAllMediaOperations(
-            operationContext,
-            cancelMediaOptions
-          );
-        var response = cancelMediaResponse._response.parsedBody; //CancelAllMediaOperationsResult
-
-        Logger.logMessage(
-          MessageType.INFORMATION,
-          "cancelAllMediaOperationsWithResponse -- > " +
-            cancelMediaResponse._response.bodyAsText +
-            ", Id: " +
-            response.operationId +
-            ", OperationContext: " +
-            response.operationContext +
-            ", OperationStatus: " +
-            response.status
-        );
+        await this.callConnection.cancelAllMediaOperations(cancelMediaOptions);
       }
     } catch (ex) {
       Logger.logMessage(
@@ -289,10 +269,10 @@ export class OutboundCallReminder {
           response.status
       );
 
-      if (response.status == KnownOperationStatus.Running) {
+      if (response.status.toLowerCase() === "running") {
         Logger.logMessage(
           MessageType.INFORMATION,
-          "Play Audio state -- > " + KnownOperationStatus.Running
+          "Play Audio state -- > " + response.status
         );
         this.playAudioTaskCompleted = true;
 
@@ -345,7 +325,7 @@ export class OutboundCallReminder {
             "Play audio status -- > " + playAudioResultEvent.status
           );
 
-          if (playAudioResultEvent.status == KnownOperationStatus.Completed) {
+          if (playAudioResultEvent.status.toLowerCase() === "completed") {
             await EventDispatcher.getInstance().unsubscribe(
               KnownCallingServerEventType.PLAY_AUDIO_RESULT_EVENT,
               operationContext
@@ -412,10 +392,13 @@ export class OutboundCallReminder {
             operationContext,
             addParticipantOptions
           );
-        Logger.logMessage(
-          MessageType.INFORMATION,
-          "addParticipantWithResponse -- > " + response._response.bodyAsText
-        );
+        if (response && response.participantId) {
+          Logger.logMessage(
+            MessageType.INFORMATION,
+            "addParticipantWithResponse -- > addParticipant completed with participant id" +
+              +response.participantId
+          );
+        }
       }
     } catch (ex) {
       Logger.logMessage(
@@ -433,13 +416,13 @@ export class OutboundCallReminder {
             callEvent;
           var operationStatus = addParticipantsUpdatedEvent.status;
 
-          if (operationStatus == KnownOperationStatus.Completed) {
+          if (operationStatus.toLowerCase() === "completed") {
             Logger.logMessage(
               MessageType.INFORMATION,
               "Add participant status -- > " + operationStatus
             );
             await this.hangupAsync();
-          } else if (operationStatus == KnownOperationStatus.Failed) {
+          } else if (operationStatus.toLowerCase() === "failed") {
             Logger.logMessage(
               MessageType.INFORMATION,
               " add participant failed"
