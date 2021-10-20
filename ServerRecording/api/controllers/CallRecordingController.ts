@@ -1,5 +1,6 @@
-import { ServerCallLocator } from "@azure/communication-callingserver";
+import { ServerCallLocator, ContentDownloadResponse } from "@azure/communication-callingserver";
 import { Request, Response } from "express";
+import * as fs from 'fs';
 
 var cfg = require("../../config");
 
@@ -113,7 +114,7 @@ exports.resumeRecording = async function (req: Request, res: Response) {
 
 exports.stopRecording = async function (req: Request, res: Response) {
   try {
-   let serverCallId: string = req.query.serverCallId.toString();
+    let serverCallId: string = req.query.serverCallId.toString();
     if (!serverCallId || String(serverCallId).trim() == "") {
       return res.status(400).json("serverCallId is invalid");
     }
@@ -122,7 +123,7 @@ exports.stopRecording = async function (req: Request, res: Response) {
     if (!recordingId || String(recordingId).trim() == "") {
       recordingId = recordingData.get(serverCallId);
     }
-    recordingData.set(recordingId);
+    recordingData.set(serverCallId, recordingId);
 
     Logger.logMessage(
       MessageType.INFORMATION,
@@ -148,7 +149,7 @@ exports.stopRecording = async function (req: Request, res: Response) {
 
 exports.getRecordingState = async function (req: Request, res: Response) {
   try {
-   let serverCallId: string = req.query.serverCallId.toString();
+    let serverCallId: string = req.query.serverCallId.toString();
     if (!serverCallId || String(serverCallId).trim() == "") {
       return res.status(400).json("serverCallId is invalid");
     }
@@ -306,18 +307,38 @@ async function process_file(
     );
     var fileName = documentId + "." + fileFormat;
 
-    var downloadResponse = await client.download(downloadLocation);
-    Logger.logMessage(
-      MessageType.INFORMATION,
-      "downloadContent complete response ---->" + String(downloadResponse)
+    var downloadResponse: ContentDownloadResponse = await client.download(
+      downloadLocation
     );
 
-    if (downloadResponse) {
+    if (downloadResponse && downloadResponse.readableStreamBody) {
+      var writeStream = fs.createWriteStream(fileName);
+      writeStream.on("finish", () => {
+        Logger.logMessage(
+          MessageType.INFORMATION,
+          "Stream writing to file successful"
+        );
+      });
+      writeStream.on("error", () => {
+        Logger.logMessage(MessageType.ERROR, "Stream writing to file failed");
+      });
+
+      downloadResponse.readableStreamBody.pipe(writeStream);
+
       var blobUploadResult = await BlobStorageHelper.uploadFileToStorage(
         cfg.ContainerName,
         fileName,
         cfg.BlobStorageConnectionString
       );
+
+      fs.unlink(fileName, (error) => {
+        if (error) {
+          Logger.logMessage(
+            MessageType.ERROR,
+            "Temporary recording file deletion failed"
+          );
+        }
+      });
 
       if (blobUploadResult.output == true) {
         BlobStorageHelper.getBlobSasUri(

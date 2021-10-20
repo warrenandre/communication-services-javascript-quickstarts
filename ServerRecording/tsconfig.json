@@ -4,14 +4,14 @@
         "noImplicitAny": true,
         "removeComments": false,
         "preserveConstEnums": true,
-        "sourceMap": false   
+        "sourceMap": true   
     },
     "files": [
         "Logger.ts",
         "BlobStorageHelper.ts", 
         "api/controllers/CallRecordingController.ts",
-        "api/routes/callRecordingRoutes.ts", 
-        "server.ts", 
-        "config.ts"
+        "api/routes/CallRecordingRoutes.ts", 
+        "Server.ts", 
+        "Config.ts"
       ]
 }
