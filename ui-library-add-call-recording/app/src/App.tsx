@@ -30,7 +30,7 @@ function App(): JSX.Element {
     throw new Error('No token set');
   }
 
-  const displayName = 'CallRecordingDemoUser';
+  //const displayName = 'CallRecordingDemoUser';
   const groupId = v1();
 
   // We can't even initialize the adapter without a well-formed token.
@@ -64,6 +64,7 @@ function App(): JSX.Element {
       })
     };
     createAdapter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const callCompositeOptions = useMemo(() => {
