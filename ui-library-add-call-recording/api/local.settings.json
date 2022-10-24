@@ -2,8 +2,8 @@
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "ACS_CONNECTION_STRING": "endpoint=https://wajcomms.communication.azure.com/;accesskey=oAoQK8A03N1EtKwnhOQvowu+PmrZEGu3eyTUM4WoC1G962gdrGdAJnDAiOqGMKU8dIOjIZd5R0tC22OZJUDouQ==",
-    "RECORDING_STORE_CONNECTION_STRING": "endpoint=https://wajcomms.communication.azure.com/;accesskey=oAoQK8A03N1EtKwnhOQvowu+PmrZEGu3eyTUM4WoC1G962gdrGdAJnDAiOqGMKU8dIOjIZd5R0tC22OZJUDouQ==",
+    "ACS_CONNECTION_STRING": "acsconnection",
+    "RECORDING_STORE_CONNECTION_STRING": "ecs",
     "RECORDING_STORE_CONTAINER_NAME": "callrecordings"
   }
 }
