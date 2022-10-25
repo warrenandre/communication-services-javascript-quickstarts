@@ -5,7 +5,7 @@
   "scripts": {
     "start": "swa start app/build --api ./api",
     "start:dev": "swa start http://localhost:3000 --api http://localhost:7071",
-    "build": "cd app && npm run-script build && cd.. && cd api && npm run-script build",
+    "build": "cd app && npm build && cd .. && cd api && npm build",
     "lint": "eslint */**/*.{ts,tsx} --max-warnings 0",
     "lint:fix": "eslint */**/*.{ts,tsx} --fix  --max-warnings 0",
     "prettier:check": "npx prettier --check .",
